@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   const { data, error } = await supabase
     .from("comments")
-    .select("id,name,message,created_at")
+    .select("id,name,comment,created_at")
     .order("created_at", { ascending: false });
 
   if (error) return res.status(500).json({ error: error.message });
