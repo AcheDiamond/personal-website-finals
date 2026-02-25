@@ -1,12 +1,10 @@
 <template>
-  <div>
-    <div class="bg-drift"></div>
-    <PersonalProfileFinal />
-    <SoundPanel />
-  </div>
+  <OrnamentLayer />
+  <router-view />
+  <SoundPanel />
 </template>
 
 <script setup>
-import PersonalProfileFinal from "./components/PersonalProfileFinal.vue";
+import OrnamentLayer from "./components/OrnamentLayer.vue";
 import SoundPanel from "./components/SoundPanel.vue";
 </script>

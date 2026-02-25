@@ -1,7 +1,23 @@
+async function parseJsonSafe(r) {
+  const text = await r.text();
+  try {
+    return text ? JSON.parse(text) : null;
+  } catch {
+
+    return { _nonJson: true, raw: text };
+  }
+}
+
 export async function getComments() {
   const r = await fetch("/api/comments-get");
-  const j = await r.json();
-  if (!r.ok) throw new Error(j.error || "Failed to fetch comments");
+  const j = await parseJsonSafe(r);
+
+  if (!r.ok) {
+    const msg = j?.error || (j?._nonJson ? `Non-JSON response: ${String(j.raw).slice(0, 120)}` : null) || "Failed to fetch comments";
+    throw new Error(msg);
+  }
+
+  if (!j || !j.data) return [];
   return j.data;
 }
 
@@ -11,7 +27,13 @@ export async function postComment(payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  const j = await r.json();
-  if (!r.ok) throw new Error(j.error || "Failed to post comment");
-  return j.data;
+
+  const j = await parseJsonSafe(r);
+
+  if (!r.ok) {
+    const msg = j?.error || (j?._nonJson ? `Non-JSON response: ${String(j.raw).slice(0, 120)}` : null) || "Failed to post comment";
+    throw new Error(msg);
+  }
+
+  return j?.data;
 }

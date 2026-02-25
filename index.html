@@ -7,6 +7,12 @@
     <title>personal-website-finals</title>
   </head>
   <body>
+    <script>
+  (function(){
+    const t = localStorage.getItem("siteTheme");
+    document.body.dataset.theme = (t === "ccg") ? "ccg" : "ghoul";
+  })();
+</script>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>

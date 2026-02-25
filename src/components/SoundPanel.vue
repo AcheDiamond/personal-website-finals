@@ -1,56 +1,95 @@
 <template>
-  <div class="sound">
-    <button class="sound-fab" @click="open = true" aria-label="Sound settings">
-      ♪ Sound
+  <div class="sound-fab">
+    <button class="btn" type="button" @click="toggle">
+      🎵 Sound
+      <span class="state">{{ playing ? "On" : "Off" }}</span>
     </button>
 
-    <div v-if="open" class="sound-backdrop" @click.self="open = false">
-      <div class="sound-panel card">
-        <div class="sound-head">
-          <h3 class="card-title">Sound Settings</h3>
-          <button class="btn ghost" @click="open = false">Close</button>
-        </div>
-
-        <p class="muted">
-          Tip: Click play inside the Spotify player. Browsers block autoplay with sound until user interaction.
-        </p>
-
-        <div class="embed-wrap">
-          <!-- Your embed (kept exactly, just formatted) -->
-          <iframe
-            style="border-radius:12px"
-            src="https://open.spotify.com/embed/track/7bUyB6btwXllCHQhNBWZ2C?utm_source=generator"
-            width="100%"
-            height="352"
-            frameborder="0"
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-          ></iframe>
-        </div>
-
-        <div class="sound-options mt">
-          <label class="check">
-            <input type="checkbox" v-model="remember" />
-            Remember that I opened this panel
-          </label>
-        </div>
+    <div class="mini" v-if="open">
+      <div class="row">
+        <span class="muted">Volume</span>
+        <input type="range" min="0" max="1" step="0.01" :value="volume" @input="onVol" />
       </div>
+
+      <div class="row">
+        <button class="pill-blood" type="button" @click="play">Play</button>
+        <button class="btn ghost" type="button" @click="stop">Pause</button>
+      </div>
+
+      <p class="muted small" style="margin:8px 0 0;">
+        Tip: browser requires you to press Play once.
+      </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref } from "vue";
+import { startAudio, pauseAudio, setVolume, getAudio } from "../lib/audioController";
 
 const open = ref(false);
-const remember = ref(true);
+const playing = ref(false);
+const volume = ref(getAudio().volume);
 
-onMounted(() => {
-  const saved = localStorage.getItem("tg_sound_panel_open");
-  if (saved === "true") open.value = true;
-});
+function toggle() { open.value = !open.value; }
 
-watch(open, (v) => {
-  if (remember.value) localStorage.setItem("tg_sound_panel_open", v ? "true" : "false");
-});
+async function play() {
+  try {
+    await startAudio();
+    playing.value = true;
+  } catch {
+    // autoplay blocked until user gesture — but this is already a click
+    playing.value = false;
+  }
+}
+
+function stop() {
+  pauseAudio();
+  playing.value = false;
+}
+
+function onVol(e) {
+  const v = Number(e.target.value);
+  volume.value = v;
+  setVolume(v);
+}
 </script>
+
+<style scoped>
+.sound-fab{
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 80;
+  display: grid;
+  gap: 10px;
+}
+
+.state{
+  margin-left: 8px;
+  font-weight: 900;
+  color: var(--blood);
+}
+
+.mini{
+  width: 240px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 60px rgba(0,0,0,.28);
+}
+
+.row{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+input[type="range"]{
+  width: 140px;
+}
+</style>
