@@ -42,7 +42,7 @@
                 <span class="name">{{ c.name }}</span>
                 <span class="time">{{ formatDate(c.created_at) }}</span>
               </div>
-              <div class="msg">{{ c.comment }}</div>
+              <div class="msg">{{ c.message ?? c.comment }}</div>
             </li>
           </ul>
 
